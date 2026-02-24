@@ -40,7 +40,7 @@ void write_output_file(BinaryImage image) {
 
 s32 main(s32 argc, string_t argv[]) {
     if (argc < 2) {
-        printf("[missing input file]...\n");
+        fprintf(stderr, "Error: missing asm/<file>.asm...\n");
         exit(EXIT_FAILURE);
     }
 

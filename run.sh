@@ -1,29 +1,49 @@
 #!/bin/sh
 set -e
 
-if [ -z "$1" ]; then
-  echo "Uso: $0 <path/to/dir> [args...]"
-  exit 1
-fi
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+CYAN='\033[0;36m'
+YELLOW='\033[0;33m'
+RESET='\033[0m'
 
-TARGET_DIR="$1"
-
-SOURCE_FILE=$(find "$TARGET_DIR" -maxdepth 1 -type f -name '*.c' | head -n 1)
-
-if [ -z "$SOURCE_FILE" ]; then
-  echo "Could not find a file .c in $TARGET_DIR"
-  exit 1
-fi
-
+COMMAND=$1
+SOURCE_FILE="lc3_assembler.c"
 BINARY_NAME=$(basename "$SOURCE_FILE" .c)
-
 BINARY_PATH="/tmp/build-your-own-x/$BINARY_NAME"
 
-mkdir -p /tmp/build-your-own-x
+mkdir -p /tmp/build-your-own-x/
 
-# clang -Wall -Wextra -g -fsanitize=address -fcolor-diagnostics "$SOURCE_FILE" -o "$BINARY_PATH"
-gcc "$SOURCE_FILE" -o "$BINARY_PATH"
+case $COMMAND in
+    clang|gcc)
+        if [ "$COMMAND" = "clang" ]; then
+            FLAGS="-Wall -Wextra -fsanitize=address -fcolor-diagnostics"
+        else
+            FLAGS="-g"
+        fi
+        
+        if ! $COMMAND $FLAGS "$SOURCE_FILE" -o "$BINARY_PATH"; then
+            echo -e "${RED}Error: Compilation failed using $COMMAND${RESET}"
+            exit 1
+        fi
 
-echo "Executing $BINARY_PATH"
-shift
-exec "$BINARY_PATH" "$@"
+        shift
+        echo -e "${GREEN}[$COMMAND]${RESET} Assembling... ${CYAN}$@${RESET}"
+        exec "$BINARY_PATH" "$@"
+        ;;
+
+    valgrind)
+        shift
+        echo -e "${YELLOW}Recompiling for Valgrind (no Sanitize)...${RESET}"
+        gcc -g "$SOURCE_FILE" -o "$BINARY_PATH"
+
+        echo -e "${GREEN}[valgrind]${RESET} Analyzing... ${CYAN}$*${RESET}"
+        $COMMAND --leak-check=full --show-leak-kinds=all "$BINARY_PATH" "$@"
+        ;;
+
+    *)
+        echo -e "${YELLOW}Usage:${RESET} $0 ${CYAN}<tool>${RESET} asm/${YELLOW}<file>${RESET}.asm"
+        echo -e "  Tools: ${GREEN}gcc, clang, valgrind${RESET}"
+        exit 1
+        ;;
+esac

@@ -8,7 +8,7 @@ LOOP_PUSH
     
     STR R5, R7, #-1
     ADD R7, R7, #-1
-    ADD R6, R6, #1          ; advance through the address in order words getting the next char
+    ADD R6, R6, #1          ; advance through the word, pointing to the next address
     BR LOOP_PUSH
 
 DONE
@@ -22,8 +22,8 @@ LOOP_POP
     BRz END
 
     AND R1, R1, #0
-    LDR R1, R7, #0          ; get the current value in the stack
-    STR R1, R5, #0          ; store it the current address of the string
+    LDR R1, R7, #0          ; get the current value from the stack
+    STR R1, R5, #0          ; store the current address of the string
     ADD R7, R7, #1
     ADD R5, R5, #1
     BR LOOP_POP

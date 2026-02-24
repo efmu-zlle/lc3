@@ -55,6 +55,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
                 instruction|= sr2; /* NOTE: [2...0]; */
             }
         } break;
+
         case OP_AND: {
             Token dr_tok = NEXT_TOKEN();
             Token sr1_tok = NEXT_TOKEN();
@@ -76,6 +77,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
                 instruction |= (sr2 & 0x07);
             }
         } break;
+
         case OP_BR: {
                 Token pc_offset9_tok = NEXT_TOKEN();
                 u16 pc_offset9;
@@ -104,6 +106,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
                 instruction |= (pc_offset9 & 0x1ff);
         } break;   
+            
         case OP_LD: {
             Token dr_tok = NEXT_TOKEN();
             Token pc_offset9_tok = NEXT_TOKEN();
@@ -113,6 +116,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_LD << 12) | (dr << 9) | (pc_offset9 & 0x1ff);
         } break;
+
         case OP_ST: {
             Token sr_tok = NEXT_TOKEN();
             Token pc_offset9_tok = NEXT_TOKEN();
@@ -123,6 +127,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_ST << 12) | (sr << 9) | (pc_offset9 & 0x1ff);
         } break;
+
         case OP_JSR: {
             Token pc_offset11_tok = NEXT_TOKEN();  
             u16 address = get_address(table, pc_offset11_tok.literal);
@@ -130,6 +135,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_JSR << 12) | (1 << 11) | (pc_offset11 & 0x7ff);
         } break;
+
         case OP_STR: {
             Token sr_tok = NEXT_TOKEN();
             Token base_r_tok = NEXT_TOKEN();
@@ -141,6 +147,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_STR << 12) | (sr << 9) | (base_r << 6)| (offset6 & 0x3f);
         } break;
+
         case OP_LDR: {
             Token sr_tok = NEXT_TOKEN();
             Token base_r_tok = NEXT_TOKEN();
@@ -152,6 +159,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_LDR << 12) | (sr << 9) | (base_r << 6)| (offset6 & 0x3f);
         } break;
+
         case OP_LDI: {
             Token dr_tok = NEXT_TOKEN();
             Token pc_offset9_tok = NEXT_TOKEN();
@@ -161,6 +169,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_LDI << 12) | (dr << 9) | (pc_offset9 & 0x1ff);
         } break;
+
         case OP_STI: {
             Token sr_tok = NEXT_TOKEN();
             Token pc_offset9_tok = NEXT_TOKEN();
@@ -171,6 +180,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_STI << 12) | (sr << 9) | (pc_offset9 & 0x1ff);
         } break;
+
         case OP_NOT: {
             Token dr_tok = NEXT_TOKEN();
             Token sr_tok = NEXT_TOKEN();
@@ -180,6 +190,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_NOT << 12) | (dr << 9) | (sr << 6) | (0x3f);
         } break;
+
         case OP_JMP: {
             instruction = OP_JMP << 12;
             if (string_equal_to(t.literal, "JMP")) {
@@ -205,6 +216,7 @@ u16 pack_instruction(Token t, TokenList tokens, u32* index, SymbolTable table, u
 
             instruction = (OP_LEA << 12) | (sr << 9) | (pc_offset9 & 0x1ff); 
         } break;
+
         case OP_TRAP: {
             instruction = (OP_TRAP << 12);
 
@@ -249,6 +261,7 @@ BinaryImage assemble(Arena* arena, TokenList tokens, SymbolTable table) {
                 case DIR_ORIG: {
                     i++;
                 } continue;
+
                 case DIR_FILL: {
                     next_t = NEXT_TOKEN()
                     u16 instruction;
@@ -263,6 +276,7 @@ BinaryImage assemble(Arena* arena, TokenList tokens, SymbolTable table) {
                     add_binary_image(&image, instruction);
                     current_pc += 1;
                 } continue;
+
                 case DIR_BLKW: {
                     Token blkw_tok = NEXT_TOKEN();
                     u16 blkw = parser_immediate(blkw_tok.literal);
@@ -271,6 +285,7 @@ BinaryImage assemble(Arena* arena, TokenList tokens, SymbolTable table) {
                     }
                     current_pc += blkw;
                 } continue;
+
                 case DIR_STRINGZ: {
                     Token stringz_tok = NEXT_TOKEN();
                     u16 len = string_len(stringz_tok.literal);
